@@ -13,6 +13,11 @@ public class QuotesController
     {
         _contactService = new QuotesServices();
     }
+    [HttpPut("AddQuotes")]
+    public async Task<int> AddQuotes(Quotes quote)
+    {
+        return await _contactService.AddQuotes(quote);
+    }
     [HttpPut]
     public async Task<int> UpdateQuotes(Quotes quote)
     {

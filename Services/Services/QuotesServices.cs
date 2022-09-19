@@ -17,7 +17,16 @@ namespace Services.Services
         {
             _connectionString = "Server = 127.0.0.1; Port = 5433; Database = Quotes; User Id = postgres; Password = 45sD67ghone;";
         }
-
+      
+        public async Task<int> AddQuotes(Quotes quote)
+        {
+            using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
+            {
+                string sql = $"INSERT INTO quotes(author , quotestext ,categoryId ) VALUES ('{quote.Author}','{quote.QuotesText}' , '{quote.CategoryId}') ";
+                var response = await connection.ExecuteAsync(sql);
+                return response;
+            }
+        }
         public async Task<int> UpdateQuotes(Quotes quote)
         {
             using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
