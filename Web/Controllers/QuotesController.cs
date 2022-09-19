@@ -38,6 +38,11 @@ public class QuotesController
     {
         return await _contactService.GetQuotesById(id);
     }
+    [HttpGet("WithCategoryName")]
+    public async Task<List<QuotesDto>> GetQuotesWithCategoryName(int id)
+    {
+        return await _contactService.GetQuotesWithCategoryName(id);
+    }
     [HttpGet("rendom")]
     public async Task<Quotes> GetQuotesRendom()
     {

@@ -54,13 +54,21 @@ namespace Services.Services
                 return list.ToList();
             }
         }
-
         public async Task<List<Quotes>> GetQuotesById(int id)
         {
             using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
             {
                 var sql = $"SELECT * FROM quotes JOIN category ON quotes.categoryid = category.id where quotes.categoryid = {id};";
                 var list = await connection.QueryAsync<Quotes>(sql);
+                return list.ToList();
+            }
+        }
+        public async Task<List<QuotesDto>> GetQuotesWithCategoryName(int id)
+        {
+            using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
+            {
+                var sql = $"SELECT quotes.id , quotes.author , quotes.quotestext , concat('Name: ' , category.name , ' ' , 'Id: ' , category.id ) as Category  FROM quotes JOIN category ON quotes.categoryid = category.id where quotes.categoryid = {id};";
+                var list = await connection.QueryAsync<QuotesDto>(sql);
                 return list.ToList();
             }
         }
