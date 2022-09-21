@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Services.Services;
 using Domain.Emtities;
+using Domain.Wrapper; 
 namespace Quote.Controllers;
 
 [ApiController]
@@ -13,40 +14,40 @@ public class QuotesController
     {
         _contactService = new QuotesServices();
     }
-    [HttpPut("AddQuotes")]
-    public async Task<int> AddQuotes(Quotes quote)
+    [HttpPost("AddQuote")]
+    public async Task<Response<Quotes>> AddQuotes(Quotes quote)
     {
         return await _contactService.AddQuotes(quote);
     }
-    [HttpPut]
-    public async Task<int> UpdateQuotes(Quotes quote)
+    [HttpPut("UpdateQuote")]
+    public async Task<Response<string>> UpdateQuotes(Quotes quote)
     {
         return await _contactService.UpdateQuotes(quote);
     }
-    [HttpDelete]
-    public async Task<int> DeleteQuotes(int id)
+    [HttpDelete("DeleteQuote")]
+    public async Task<Response<string>> DeleteQuotes(int id)
     {
         return await _contactService.DeleteQuotes(id);
     }
-    [HttpGet]
-    public async Task<List<Quotes>> GetQuotes()
+    [HttpGet("GetAllQuotes")]
+    public async Task<Response< List<Quotes> > > GetQuotes()
     {
-        return await _contactService.GetQuotes();
+      return await _contactService.GetQuotes();
     }
-    [HttpGet("id")]
-    public async Task<List<Quotes>> GetQuotesById(int id)
+    [HttpGet("GetQuotesById")]
+    public async Task<Response<Quotes>> GetQuotesById(int id)
     {
-        return await _contactService.GetQuotesById(id);
+      return await _contactService.GetQuotesById(id);
     }
-    [HttpGet("WithCategoryName")]
-    public async Task<List<QuotesDto>> GetQuotesWithCategoryName(int id)
+    [HttpGet("GetQuotesWithCategoryName")]
+    public async Task<Response<List<QuotesDto>>> GetQuotesWithCategoryName(int id)
     {
-        return await _contactService.GetQuotesWithCategoryName(id);
+       return await _contactService.GetQuotesWithCategoryName(id);
     }
-    [HttpGet("rendom")]
-    public async Task<Quotes> GetQuotesRendom()
+    [HttpGet("GetRendomQuote")]
+    public async Task<Response<Quotes>> GetQuotesRendom()
     {
-        return await _contactService.GetQuotesRendom();
+       return  await _contactService.GetQuotesRendom();
     }
 
 

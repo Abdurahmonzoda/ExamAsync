@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Domain.Emtities;
 using Dapper;
+using Domain.Wrapper;
 
 namespace Services.Services
 {
@@ -17,68 +18,123 @@ namespace Services.Services
         {
             _connectionString = "Server = 127.0.0.1; Port = 5433; Database = Quotes; User Id = postgres; Password = 45sD67ghone;";
         }
+   
       
-        public async Task<int> AddQuotes(Quotes quote)
-        {
-            using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
-            {
-                string sql = $"INSERT INTO quotes(author , quotestext ,categoryId ) VALUES ('{quote.Author}','{quote.QuotesText}' , '{quote.CategoryId}') ";
-                var response = await connection.ExecuteAsync(sql);
-                return response;
-            }
-        }
-        public async Task<int> UpdateQuotes(Quotes quote)
+        
+        public async Task<Response<string> >UpdateQuotes(Quotes quote)
         {
             using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
             {
                 string sql = $"UPDATE  quotes SET author = '{quote.Author}', quotesText = '{quote.QuotesText}' WHERE id = '{quote.Id}'";
+                try
+                { 
                 var response = await connection.ExecuteAsync(sql);
-                return response;
+                return new Response<string>( "Success");
+                }
+                catch (Exception ex)
+                {
+                    return new Response<string>( $"Very bad error : {ex.Message}");
+                }
             }
         }
-        public async Task<int> DeleteQuotes(int id)
+        public async Task< Response<string>> DeleteQuotes(int id)
         {
             using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
             {
                 string sql = $"DELETE FROM quotes WHERE id = '{id}'";
-                var response = await connection.ExecuteAsync(sql);
-                return response;
+                try
+                {
+                    var response = await connection.ExecuteAsync(sql);
+                    return new Response<string>("Success");
+                }
+                catch (Exception ex)
+                {
+                    return new Response<string>($"Very bad error : {ex.Message}");
+                }
             }
+
         }
-        public async Task<List<Quotes>> GetQuotes()
+        public async Task<Response<List< Quotes>>> GetQuotes()
         {
             using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
             {
                 var sql = $"SELECT * FROM quotes";
-                var list = await connection.QueryAsync<Quotes>(sql);
-                return list.ToList();
+                try
+                {
+                    var list = await connection.QueryAsync<Quotes>(sql);
+                    return new Response<List<Quotes>>(list.ToList());
+
+                }
+                catch (Exception ex)
+                {
+                   return new Response<List<Quotes>>(System.Net.HttpStatusCode.InternalServerError,ex.Message) ;
+                }
             }
         }
-        public async Task<List<Quotes>> GetQuotesById(int id)
+        public async Task<Response<Quotes>> GetQuotesById(int id)
         {
             using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
             {
-                var sql = $"SELECT * FROM quotes JOIN category ON quotes.categoryid = category.id where quotes.categoryid = {id};";
-                var list = await connection.QueryAsync<Quotes>(sql);
-                return list.ToList();
+                var sql = $"SELECT * FROM quotes  where quotes.id = {id};";
+                try
+                {
+                    var list = await connection.QuerySingleAsync<Quotes>(sql);
+                    return new Response<Quotes>(list);
+                }
+                catch (Exception ex)
+                {
+                   return new Response<Quotes>(System.Net.HttpStatusCode.InternalServerError,ex.Message);
+                }
             }
         }
-        public async Task<List<QuotesDto>> GetQuotesWithCategoryName(int id)
+        public async Task<Response<List<QuotesDto>>> GetQuotesWithCategoryName(int id)
         {
             using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
             {
                 var sql = $"SELECT quotes.id , quotes.author , quotes.quotestext , concat('Name: ' , category.name , ' ' , 'Id: ' , category.id ) as Category  FROM quotes JOIN category ON quotes.categoryid = category.id where quotes.categoryid = {id};";
-                var list = await connection.QueryAsync<QuotesDto>(sql);
-                return list.ToList();
+                try
+                {
+                    var list = await connection.QueryAsync<QuotesDto > (sql);
+                    return new Response<List<QuotesDto>>(list.ToList());
+                }
+                catch (Exception ex)
+                {
+                    return new Response<List<QuotesDto>>(System.Net.HttpStatusCode.InternalServerError,ex.Message) ;
+                }
             }
         }
-        public async Task<Quotes> GetQuotesRendom()
+        public async Task<Response< Quotes>> GetQuotesRendom()
         {
             using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
             {
                 var sql = $"select * from Quotes order by random() limit 1 ;";
-                var list = await connection.QuerySingleAsync<Quotes>(sql);
-                return list;
+                try
+                {
+                    var list = await connection.QuerySingleAsync<Quotes>(sql);
+                   return new Response<Quotes>(list);
+                }
+                catch (Exception ex)
+                {
+                    return new Response<Quotes>(System.Net.HttpStatusCode.InternalServerError,ex.Message);
+                }
+            }
+        }
+
+        public async Task<Response <Quotes>> AddQuotes(Quotes quote)
+        {
+            using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
+            {
+                string sql = $"INSERT INTO Quotes (author , quotestext , categoryid) VALUES (@Author,@QuotesText,@CategoryId) RETURNING id";
+                try
+                {
+                    var response = await connection.ExecuteScalarAsync<int>(sql , new { quote.Author, quote.QuotesText , quote.CategoryId });
+                    quote.Id = response;
+                    return new Response<Quotes>(quote);
+                }
+                catch (Exception ex)
+                {
+                    return new Response<Quotes>(System.Net.HttpStatusCode.InternalServerError, ex.Message); 
+                }
             }
         }
 
