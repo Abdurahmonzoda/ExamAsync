@@ -21,7 +21,7 @@ namespace Services.Services
    
       
         
-        public async Task<Response<string> >UpdateQuotes(Quotes quote)
+        public async Task<Response<Quotes> >UpdateQuotes(Quotes quote)
         {
             using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
             {
@@ -29,11 +29,11 @@ namespace Services.Services
                 try
                 { 
                 var response = await connection.ExecuteAsync(sql);
-                return new Response<string>( "Success");
+                return new Response<Quotes>(quote);
                 }
                 catch (Exception ex)
                 {
-                    return new Response<string>( $"Very bad error : {ex.Message}");
+                    return new Response<Quotes>(System.Net.HttpStatusCode.InternalServerError,ex.Message);
                 }
             }
         }
@@ -91,7 +91,7 @@ namespace Services.Services
         {
             using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
             {
-                var sql = $"SELECT quotes.id , quotes.author , quotes.quotestext , concat('Name: ' , category.name , ' ' , 'Id: ' , category.id ) as Category  FROM quotes JOIN category ON quotes.categoryid = category.id where quotes.categoryid = {id};";
+                var sql = $"SELECT quotes.id , quotes.author , quotes.quotestext , category.name as Category   FROM quotes JOIN category ON quotes.categoryid = category.id where quotes.categoryid = {id};";
                 try
                 {
                     var list = await connection.QueryAsync<QuotesDto > (sql);

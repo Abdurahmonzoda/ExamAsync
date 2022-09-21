@@ -20,7 +20,7 @@ public class QuotesController
         return await _contactService.AddQuotes(quote);
     }
     [HttpPut("UpdateQuote")]
-    public async Task<Response<string>> UpdateQuotes(Quotes quote)
+    public async Task<Response<Quotes>> UpdateQuotes(Quotes quote)
     {
         return await _contactService.UpdateQuotes(quote);
     }
