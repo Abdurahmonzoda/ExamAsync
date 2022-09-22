@@ -13,18 +13,17 @@ namespace Services.Services
     public class QuotesServices
     {
 
-        private string _connectionString;
-        public QuotesServices()
+        private DataContext.DataContext _context;
+        public QuotesServices(DataContext.DataContext context)
         {
-            _connectionString = "Server = 127.0.0.1; Port = 5433; Database = Quotes; User Id = postgres; Password = 45sD67ghone;";
+            _context = context;
         }
    
       
         
         public async Task<Response<Quotes> >UpdateQuotes(Quotes quote)
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
-            {
+            using var connection = _context.CreateConnection();
                 string sql = $"UPDATE  quotes SET author = '{quote.Author}', quotesText = '{quote.QuotesText}' WHERE id = '{quote.Id}'";
                 try
                 { 
@@ -36,11 +35,10 @@ namespace Services.Services
                     return new Response<Quotes>(System.Net.HttpStatusCode.InternalServerError,ex.Message);
                 }
             }
-        }
         public async Task< Response<string>> DeleteQuotes(int id)
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
-            {
+            using var connection = _context.CreateConnection();
+           
                 string sql = $"DELETE FROM quotes WHERE id = '{id}'";
                 try
                 {
@@ -52,12 +50,9 @@ namespace Services.Services
                     return new Response<string>($"Very bad error : {ex.Message}");
                 }
             }
-
-        }
         public async Task<Response<List< Quotes>>> GetQuotes()
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
-            {
+            using var connection = _context.CreateConnection();
                 var sql = $"SELECT * FROM quotes";
                 try
                 {
@@ -69,12 +64,10 @@ namespace Services.Services
                 {
                    return new Response<List<Quotes>>(System.Net.HttpStatusCode.InternalServerError,ex.Message) ;
                 }
-            }
         }
         public async Task<Response<Quotes>> GetQuotesById(int id)
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
-            {
+            using var connection = _context.CreateConnection();
                 var sql = $"SELECT * FROM quotes  where quotes.id = {id};";
                 try
                 {
@@ -86,11 +79,9 @@ namespace Services.Services
                    return new Response<Quotes>(System.Net.HttpStatusCode.InternalServerError,ex.Message);
                 }
             }
-        }
         public async Task<Response<List<QuotesDto>>> GetQuotesWithCategoryName(int id)
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
-            {
+            var connection = _context.CreateConnection();
                 var sql = $"SELECT quotes.id , quotes.author , quotes.quotestext , category.name as Category   FROM quotes JOIN category ON quotes.categoryid = category.id where quotes.categoryid = {id};";
                 try
                 {
@@ -101,12 +92,10 @@ namespace Services.Services
                 {
                     return new Response<List<QuotesDto>>(System.Net.HttpStatusCode.InternalServerError,ex.Message) ;
                 }
-            }
         }
         public async Task<Response< Quotes>> GetQuotesRendom()
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
-            {
+            var connection = _context.CreateConnection();
                 var sql = $"select * from Quotes order by random() limit 1 ;";
                 try
                 {
@@ -118,12 +107,10 @@ namespace Services.Services
                     return new Response<Quotes>(System.Net.HttpStatusCode.InternalServerError,ex.Message);
                 }
             }
-        }
 
         public async Task<Response <Quotes>> AddQuotes(Quotes quote)
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
-            {
+            var connection = _context.CreateConnection();
                 string sql = $"INSERT INTO Quotes (author , quotestext , categoryid) VALUES (@Author,@QuotesText,@CategoryId) RETURNING id";
                 try
                 {
@@ -136,7 +123,6 @@ namespace Services.Services
                     return new Response<Quotes>(System.Net.HttpStatusCode.InternalServerError, ex.Message); 
                 }
             }
-        }
 
     }
 }

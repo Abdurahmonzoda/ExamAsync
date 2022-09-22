@@ -10,9 +10,9 @@ public class QuotesController
 {
 
     private QuotesServices _contactService;
-    public QuotesController()
+    public QuotesController(QuotesServices contactService)
     {
-        _contactService = new QuotesServices();
+        _contactService = contactService;
     }
     [HttpPost("AddQuote")]
     public async Task<Response<Quotes>> AddQuotes(Quotes quote)
@@ -52,6 +52,6 @@ public class QuotesController
 
 
 
-
+    
 }
 
